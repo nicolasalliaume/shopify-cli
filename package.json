@@ -1,0 +1,14 @@
+{
+  "name": "shopify-cli",
+  "version": "1.0.0",
+  "description": "Command line tools for Shopify",
+  "main": "index.js",
+  "author": "Nicolas Alliaume @ ON Lab",
+  "license": "MIT",
+  "dependencies": {
+    "colors": "^1.3.2",
+    "dotenv": "^6.0.0",
+    "fetch": "^1.1.0",
+    "shopify-api-node": "^2.15.0"
+  }
+}
