@@ -2,13 +2,20 @@
   "name": "shopify-cli",
   "version": "1.0.0",
   "description": "Command line tools for Shopify",
-  "main": "index.js",
-  "author": "Nicolas Alliaume @ ON Lab",
+  "main": "cli.js",
+  "author": "Nicolas Alliaume @ on-lab.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nicolasalliaume/shopify-cli"
+  },
   "license": "MIT",
   "dependencies": {
     "colors": "^1.3.2",
     "dotenv": "^6.0.0",
     "fetch": "^1.1.0",
     "shopify-api-node": "^2.15.0"
+  },
+  "bin": {
+    "shopify-cli": "./cli.js"
   }
 }

@@ -1,3 +1,5 @@
+#!/usr/bin/env node
+
 const argv = [ ...process.argv ].splice( 2 );
 
 ( async function() {
