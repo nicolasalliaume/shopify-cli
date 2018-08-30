@@ -4,6 +4,8 @@ const argv = [ ...process.argv ].splice( 2 );
 
 ( async function() {
 
+	if ( argv.length === 0 ) return console.log( help() );
+
 	const command = parse( argv );
 
 	if ( command.v || command.version ) return console.log( 'v1.0.0' );
