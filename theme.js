@@ -279,6 +279,10 @@ async function upload( command ) {
  */
 function showError( e, action ) {
 	switch ( e.statusCode ) {
+
+		case 999: { // our own Auth error
+			return console.log( e.message );
+		}
 		
 		case 404: {
 			return console.log( 
