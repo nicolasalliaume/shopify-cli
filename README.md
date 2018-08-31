@@ -28,11 +28,17 @@ If you've used the Theme Dev Toolkit for Shopify, you've probably done this befo
 ## Create a private app
 First, you'll need to create a private app to get a key and a password that the CLI will use to connect to your store when you run a command.
 Log into your Shopify admin page, go to **_Apps_**, scroll down, and click on the link that says _'Manage private apps'_. 
-Then, click on _'Create a new private app'_. Give it a name, and fill in your email too. Finally, enable the following permissions:
+Then, click on _'Create a new private app'_. Give it a name, and fill in your email too. 
+
+![Create private app](https://s3-us-west-2.amazonaws.com/onlab-tmp-bucket/shopify-cli/CLI+setup.png)
+
+Finally, enable the following permissions:
 
 	- Products, variants and collections: **'Read and write'**
 	- Theme templates and theme assets: **'Read and write'**
 	- Orders, transactions and fulfillments: **'Read and write'**
+
+![Setup permissions](https://s3-us-west-2.amazonaws.com/onlab-tmp-bucket/shopify-cli/CLI+Permissions.png)
 
 Save the app and copy the **_'API key'_** and **_'Password'_**. Then, open the terminal and...
 
@@ -76,6 +82,15 @@ Example: `$ shopify-cli themes duplicate 231761231 --name "Duplicate of Debut"`
 Copies assets from the source theme into the target theme. All assets will be copied, unless a list of files is provided.
 
 Example: `$ shopify-cli themes sync 231761231 1127862138 templates/cart.liquid templates/404.liquid assets/main.js`
+
+## Theme Kit integration
+[Theme kit](https://shopify.github.io/themekit/) is a cross-platform tool for building Shopify Themes. Theme Kit uses a yaml config file that you can create with Shopify CLI.
+
+#### Install Theme Kit `$ shopify-cli kit install`
+Installes Shopify Theme Kit in your system. No need to use this if you won't be using Theme Kit or you already have it installed.
+
+#### Create config `$ shopify-cli kit config [ -t <id>,<id>,... ]`
+Creates a config file for Theme Kit, and adds the indicated themes to it. If no themes are specified, all themes will be included. This is great when you'll start to work on a new shop. Just run this command and get Theme Kit up and running for all your themes in a second.
 
 --------
 
