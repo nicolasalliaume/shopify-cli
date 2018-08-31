@@ -1,5 +1,6 @@
 const fs = require( 'fs' );
 const colors = require( 'colors' );
+const path = require( 'path' );
 
 module.exports = async function( command ) {
 
