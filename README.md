@@ -1,6 +1,6 @@
 # Shopify CLI Utility ( "The Wordpress CLI for Shopify" )
 
-[![npm version](https://badge.fury.io/js/shopify-cli.svg)](https://badge.fury.io/js/shopify-cli) [![Developed by ON Lab](http://on-lab.com/developed-by-on-lab.svg)](http://on-lab.com)
+[![npm version](https://badge.fury.io/js/shopify-cli.svg)](https://badge.fury.io/js/shopify-cli) [![Developed by ON Lab](http://on-lab.com/developed-by-on-lab.svg?v=2)](http://on-lab.com)
 
 Shopify CLI is a command Line utility to perform operations on Shopify stores. It makes doing some typical operations on a store much easier, specially if you're doing dev work.
 
