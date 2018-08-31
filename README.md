@@ -1,5 +1,17 @@
 # Shopify CLI Utility ( "The Wordpress CLI for Shopify" )
+
+[![npm version](https://badge.fury.io/js/shopify-cli.svg)](https://badge.fury.io/js/shopify-cli) [![Developed by ON Lab](http://on-lab.com/developed-by-on-lab.svg)](http://on-lab.com)
+
 Shopify CLI is a command Line utility to perform operations on Shopify stores. It makes doing some typical operations on a store much easier, specially if you're doing dev work.
+
+# But why?
+This tool was born after the frustration of:
+  * having to test a Shopify app on a bunch of different Themes, and to do so, having to go into the admin over and over to change the active theme and create copies
+  * developing a new feature on a copy of the theme, while other people work on other copies of a theme, and the needing to move the edited files into the active theme
+  * syncronizing changes on the live theme to a copy of the theme I was working one
+  * having to remove ONE BY ONE many themes to perform a "cleanup" after testing something on many themes
+
+A better way to do this (and many other things) needed to exist. Maybe it does already, maybe it doesn't. But here's one now.
 
 # ⓵ Installation
 
@@ -64,3 +76,7 @@ Example: `$ shopify-cli themes duplicate 231761231 --name "Duplicate of Debut"`
 Copies assets from the source theme into the target theme. All assets will be copied, unless a list of files is provided.
 
 Example: `$ shopify-cli themes sync 231761231 1127862138 templates/cart.liquid templates/404.liquid assets/main.js`
+
+--------
+
+[![ON Lab](http://on-lab.com/on-lab.jpg)](http://on-lab.com)
