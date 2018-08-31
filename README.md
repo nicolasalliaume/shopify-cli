@@ -2,16 +2,16 @@
 
 [![npm version](https://badge.fury.io/js/shopify-cli.svg)](https://badge.fury.io/js/shopify-cli) [![Developed by ON Lab](http://on-lab.com/developed-by-on-lab.svg?v=3)](http://on-lab.com)
 
-Shopify CLI is a command Line utility to perform operations on Shopify stores. It makes doing some typical operations on a store much easier, specially if you're doing dev work.
+Shopify CLI is a command line utility used to perform operations on Shopify stores. It makes doing some typical operations in a store much easier, especially if you're doing dev work.
 
 # But why?
-This tool was born after the frustration of:
-  * having to test a Shopify app on a bunch of different Themes, and to do so, having to go into the admin over and over to change the active theme and create copies
-  * developing a new feature on a copy of the theme, while other people work on other copies of a theme, and the needing to move the edited files into the active theme
-  * syncronizing changes on the live theme to a copy of the theme I was working one
-  * having to remove ONE BY ONE many themes to perform a "cleanup" after testing something on many themes
+This tool was born out of the frustration of:
+  * Having to test a Shopify app on a bunch of different themes, and to do so, having to go into the admin over and over to change the active theme and create copies
+  * Developing a new feature on a copy of the theme while other people work on other copies of a theme, and needing to move the edited files into the active theme
+  * Syncronizing changes on the live theme to a copy of the theme I was working on
+  * Having to remove many themes ONE BY ONE to perform a "cleanup" after testing something on many themes
 
-A better way to do this (and many other things) needed to exist. Maybe it does already, maybe it doesn't. But here's one now.
+A better way to do this work needed to exist. Maybe it does already, maybe it doesn't. But anyway, here's one now.
 
 # ⓵ Installation
 
@@ -26,7 +26,7 @@ In order to run the commands, the CLI needs access to your Shopify store. For th
 If you've used the Theme Dev Toolkit for Shopify, you've probably done this before.
 
 ## Create a private app
-You need to create a private app to get a key and a password that the CLI will use to connect to your store when you run a command.
+First, you'll need to create a private app to get a key and a password that the CLI will use to connect to your store when you run a command.
 Log into your Shopify admin page, go to **_Apps_**, scroll down, and click on the link that says _'Manage private apps'_. 
 Then, click on _'Create a new private app'_. Give it a name, and fill in your email too. Finally, enable the following permissions:
 
@@ -38,15 +38,15 @@ Save the app and copy the **_'API key'_** and **_'Password'_**. Then, open the t
 
 ## Run the config command to save your auth
 Run `$ shopify-cli config -d <domain> -k <api key> -p <api password>`, where domain is the shop's Shopify domain (for example, '_mystore.myshopify.com_'). 
-This will save in a local file your API key and Password, so you don't have to input them every time you run a command.
+This will save your API key and Password in a local file so you don't have to input them every time you run a command.
 
 # Operations supported (_so far_)
-Right now, the CLI is supporting the following operations:
+Right now, the CLI supports the following operations:
 
 ## Themes
 
 #### List themes `$ shopify-cli themes list`
-This command will return a list of all the themes, indicating the active one. It also includes created time, updated time and ID.
+This command returns a list of all the themes, indicating the active one. It also includes created time, updated time and ID.
 
 Example: `$ shopify-cli themes list`
 
@@ -68,7 +68,7 @@ Renames the theme with the given ID, setting the given name. The new name accept
 Example: `$ shopify-cli themes rename 231761231 "Former %name%"` will rename a theme called "Debut" into "Former Debut".
 
 #### Duplicate theme `$ shopify-cli themes duplicate <id> [ --name "New theme name" ]`
-This command creates a copy of the theme with the given ID. Escentially, it creates a new theme (with provided name, if any), and copy every asset from the source theme into the new theme.
+This command creates a copy of the theme with the given ID. Escentially, it creates a new theme (with provided name, if any), and copies every asset from the source theme into the new theme.
 
 Example: `$ shopify-cli themes duplicate 231761231 --name "Duplicate of Debut"`
 
