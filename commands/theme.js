@@ -1,6 +1,16 @@
-const utils = require( './utils' );
+const utils = require( '../utils' );
 const colors = require( 'colors' );
 
+/**
+ * Actions supported by this module
+ */
+const SUPPORTS = [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename', 'sync', '_delete' ];
+
+/**
+ * Module entry point
+ * 
+ * @param  {Object} command The parsed command
+ */
 module.exports = function( command ) {
 
 	let action = command[ '__' ][ 1 ];
@@ -8,7 +18,7 @@ module.exports = function( command ) {
 
 	if ( command.help ) return printHelp( action );
 
-	if ( [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename', 'sync', '_delete' ].includes( action ) ) {
+	if ( SUPPORTS.includes( action ) ) {
 		eval( `${ action }( command )` );
 	}
 	else return printHelp( action );
@@ -21,7 +31,7 @@ module.exports = function( command ) {
  */
 async function list( command ) {
 	try {
-		const themes = await utils.getShopify( command ).theme.list();
+		const themes = await utils.getThemes( command );
 		if ( command.json ) return console.log( themes );
 
 		themes.forEach( theme => {
@@ -209,8 +219,19 @@ from ${ sourceTheme.name.bold } to ${ targetTheme.name.bold }` );
 	}
 }
 
-
-async function _sync( sourceTheme, targetTheme, assetKeys, json = false, shopify ) {
+/**
+ * Syncs assets between two existing themes. The list
+ * of assets is indicated in the assetsKey param.
+ *
+ * If silent is true, no messages are shown.
+ * 
+ * @param  {Object}  sourceTheme 
+ * @param  {Object}  targetTheme 
+ * @param  {Array}  assetKeys   
+ * @param  {Boolean} silent        
+ * @param  {Object}  shopify     
+ */
+async function _sync( sourceTheme, targetTheme, assetKeys, silent = false, shopify ) {
 	var finished = 0;
 	!json && console.log( `⌛️  Copying assets from source theme ${ sourceTheme.name.bold }...` );
 	
@@ -341,20 +362,26 @@ function help( action ) {
  */
 function helpGeneral() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes <action> [ params ] [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes <action> [ params ] \
+[ ( --domain | -d ) <domain> ( --key | -k ) \<api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes list -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes list -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes list
+   ${ 'Example:'.bold } $ shopify-cli themes list
 
 👉  ${ 'Available actions:'.bold }
 
 	- list 		Lists all themes
-	- activate 		Activates a theme
-	- remove 		Removes a theme
-	- upload 		Uploads a theme
+	- activate 	Activates a theme
+	- rename 	Renames a theme
+	- duplicate	Duplicates a theme
+	- remove 	Removes a theme
+	- upload 	Uploads a theme
+	- sync 		Syncronizes files between two themes
 
-🤓  ${ '#protip:'.bold.italic } Use --help with an action to get specific help for that action. i.e: $ node index.js themes list --help
+🤓  ${ '#protip:'.bold.italic } Use --help with an action to get specific help for that action. \
+i.e: $ shopify-cli themes list --help
 	`
 }
 
@@ -366,11 +393,13 @@ function helpGeneral() {
  */
 function helpList() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes list [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes list [ ( --domain | -d ) <domain> ( --key | -k ) \
+<api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes list -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes list -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 \
+-p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes list
+   ${ 'Example:'.bold } $ shopify-cli themes list
 
 🤓  ${ '#protip:'.bold.italic } Use --json to get a JSON output instead of the pretty one.
 	`
@@ -384,11 +413,13 @@ function helpList() {
  */
 function helpActivate() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes activate <id> [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes activate <id> [ ( --domain | -d ) <domain> ( --key | -k ) \
+<api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes activate 129823982 -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes activate 129823982 -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes activate 129823982
+   ${ 'Example:'.bold } $ shopify-cli themes activate 129823982
 	`
 }
 
@@ -400,11 +431,13 @@ function helpActivate() {
  */
 function helpRemove() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes remove <id> [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes remove <id> [ ( --domain | -d ) <domain> ( --key | -k ) \
+<api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes remove 123871292 -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes remove 123871292 -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes remove 123871292
+   ${ 'Example:'.bold } $ shopify-cli themes remove 123871292
 	`
 }
 
@@ -416,15 +449,17 @@ function helpRemove() {
  */
 function helpDuplicate() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes duplicate <id> [ --name <name> ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes duplicate <id> [ --name <name> ( --domain | -d ) <domain> \
+( --key | -k ) <api key> ( --password | -p ) <api password> ]
 
 👉  Available options:
 
 	--name 		Name to use for the new Theme (optional)
 
-🙌  ${ 'Example:'.bold } $ node index.js themes duplicate 123871292 --name "Duplicated theme" -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes duplicate 123871292 --name "Duplicated theme" \
+-d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes duplicate 123871292 --name "Duplicated theme"
+   ${ 'Example:'.bold } $ shopify-cli themes duplicate 123871292 --name "Duplicated theme"
 
 	If no name is provided, "Copy of " will be used, like Shopify does.
 	`
@@ -438,14 +473,17 @@ function helpDuplicate() {
  */
 function helpRename() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes rename <id> <name> [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes rename <id> <name> [ ( --domain | -d ) \
+<domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes rename 123871292 "New name" -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes rename 123871292 "New name" -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes rename 123871292 "New name"
+   ${ 'Example:'.bold } $ shopify-cli themes rename 123871292 "New name"
 
 🤓  ${ '#protip:'.bold.italic } --name can be used with this command to set the new name.
-🤓  ${ '#superprotip:'.bold.italic } Use %name% and %id% as a template variables. They will be replaced with the value from the ${ 'old'.bold } theme.
+🤓  ${ '#superprotip:'.bold.italic } Use %name% and %id% as a template variables. They will be \
+replaced with the value from the ${ 'old'.bold } theme.
 	`
 }
 
@@ -457,14 +495,16 @@ function helpRename() {
  */
 function helpSync() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes sync <id source> <id target> [ files ] [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes sync <id source> <id target> [ files ] \
+[ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes sync 123871292 888279221 -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes sync 123871292 888279221 -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes sync 123871292 888279221
+   ${ 'Example:'.bold } $ shopify-cli themes sync 123871292 888279221
 
    You can also indicate which files you want to sync, like this:
-   ${ 'Example:'.bold } $ node index.js themes sync 123871292 888279221 assets/main.js layouts/theme.liquid ...
+   ${ 'Example:'.bold } $ shopify-cli themes sync 123871292 888279221 assets/main.js layouts/theme.liquid ...
 	`
 }
 
@@ -476,10 +516,12 @@ function helpSync() {
  */
 function helpUpload() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js themes upload <id> [ ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password> ]
+✅  ${ 'Usage:'.bold } $ shopify-cli themes upload <id> [ ( --domain | -d ) <domain> ( --key | -k ) \
+<api key> ( --password | -p ) <api password> ]
 
-🙌  ${ 'Example:'.bold } $ node index.js themes upload 288929917 -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli themes upload 288929917 -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
-   ${ 'Example:'.bold } $ node index.js themes upload 288929917
+   ${ 'Example:'.bold } $ shopify-cli themes upload 288929917
 	`
 }

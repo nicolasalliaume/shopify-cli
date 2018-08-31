@@ -12,6 +12,7 @@
   "dependencies": {
     "colors": "^1.3.2",
     "dotenv": "^6.0.0",
+    "node-cmd": "^3.0.0",
     "shopify-api-node": "^2.15.0"
   },
   "bin": {

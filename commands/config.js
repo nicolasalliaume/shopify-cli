@@ -2,6 +2,11 @@ const fs = require( 'fs' );
 const colors = require( 'colors' );
 const path = require( 'path' );
 
+/**
+ * Module entry point
+ * 
+ * @param  {Object} command The parsed command
+ */
 module.exports = async function( command ) {
 
 	const domain = command.d || command.domain;
@@ -12,9 +17,10 @@ module.exports = async function( command ) {
 
 	try {
 		// remove previous .env if any
-		fs.unlinkSync( path.join( __dirname, '.env' ) );
+		fs.unlinkSync( path.join( '.', '.env' ) );
 	}
-	catch (e) { /* do nothing */ }
+	catch (e) { /* do nothing, it's safe */ }
+
 	// write new .env with config params
 	writeConfigFile( domain, key, password );
 
@@ -24,6 +30,7 @@ Configured site:
 🔑  ${key}
 🔑  ${password}
 ` );
+
 }
 
 function indexOf( e, arr ) {
@@ -34,7 +41,7 @@ function indexOf( e, arr ) {
 
 function writeConfigFile( domain, key, password ) {
 	const content = `DOMAIN=${domain}\nKEY=${key}\nPASSWORD=${password}`;
-	fs.writeFileSync( path.join( __dirname, '.env' ), content );
+	fs.writeFileSync( path.join( '.', '.env' ), content );
 }
 
 function printHelp() {
@@ -43,9 +50,11 @@ function printHelp() {
 
 function help() {
 	return `
-✅  ${ 'Usage:'.bold } $ node index.js config ( --domain | -d ) <domain> ( --key | -k ) <api key> ( --password | -p ) <api password>
+✅  ${ 'Usage:'.bold } $ shopify-cli config ( --domain | -d ) \
+<domain> ( --key | -k ) <api key> ( --password | -p ) <api password>
 
-🙌  ${ 'Example:'.bold } $ node index.js config -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
+🙌  ${ 'Example:'.bold } $ shopify-cli config -d sample.myshopify.com \
+-k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 
 👉  ${ 'How to get auth information:'.bold.underline }
 To get a key and a password, log into your Shopify admin page, go to ${ 'Apps'.italic }, \
@@ -62,7 +71,8 @@ terminal, run:
 
 	$ shopify-cli config -d <your-store>.myshopify.com -k <paste key here> -p <paste password here>
 
-	Example: $ shopify-cli config -d niceshoes.myshopify.com -k 87123897123897iusd1829798127 -p 123898127x389213798j127982sdsda
+	Example: $ shopify-cli config -d niceshoes.myshopify.com -k 87123897123897iusd1829798127 \
+-p 123898127x389213798j127982sdsda
 
 🌟  This will save your logins ${ 'locally'.bold }, so you don't need to write them every time \
 you use the CLI.

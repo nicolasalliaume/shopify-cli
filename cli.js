@@ -15,10 +15,14 @@ const argv = [ ...process.argv ].splice( 2 );
 
 	switch ( action ) {
 
-		case 'config': return await require( './config' )( command );
+		case 'config': return await require( './commands/config' )( command );
 
 		case 'themes': 
-		case 'theme': return await require( './theme' )( command );
+		case 'theme': return await require( './commands/theme' )( command );
+
+		case 'kit':
+		case 'stk':
+		case 'themekit': return await require( './commands/kit' )( command );
 
 		default: return console.log( '❌  Error: Command not recognized. ' + help() );
 	}
@@ -69,7 +73,6 @@ function parse( argv ) {
 
 process.on( 'unhandledRejection', (reason, p) => { 
 	console.error( reason );
-	console.error( p ); 
 } );
 
 /**
@@ -79,7 +82,7 @@ process.on( 'unhandledRejection', (reason, p) => {
  */
 function help() {
 	return `
-✅  Usage: $ node index.js [ -flags ] [ action ] [ params ]
+✅  Usage: $ shopify-cli [ -flags ] [ action ] [ params ]
  
 👉  Available flags:
 	
@@ -92,6 +95,7 @@ function help() {
 👉  Available actions:
 
 	themes, theme 		Theme operations
-	config 		Save domain, key and password
+	config 			Save domain, key and password
+	kit, stk, themekit	Integrations with Shopify Theme Kit
 	`
 }
