@@ -84,7 +84,7 @@ Copies assets from the source theme into the target theme. All assets will be co
 Example: `$ shopify-cli themes sync 231761231 1127862138 templates/cart.liquid templates/404.liquid assets/main.js`
 
 ## Theme Kit integration
-[!Theme kit](https://shopify.github.io/themekit/) is a cross-platform tool for building Shopify Themes. Theme Kit uses a yaml config file that you can create with Shopify CLI.
+[Theme kit](https://shopify.github.io/themekit/) is a cross-platform tool for building Shopify Themes. Theme Kit uses a yaml config file that you can create with Shopify CLI.
 
 #### Install Theme Kit `$ shopify-cli kit install`
 Installes Shopify Theme Kit in your system. No need to use this if you won't be using Theme Kit or you already have it installed.
