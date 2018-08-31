@@ -233,7 +233,7 @@ from ${ sourceTheme.name.bold } to ${ targetTheme.name.bold }` );
  */
 async function _sync( sourceTheme, targetTheme, assetKeys, silent = false, shopify ) {
 	var finished = 0;
-	!json && console.log( `⌛️  Copying assets from source theme ${ sourceTheme.name.bold }...` );
+	!silent && console.log( `⌛️  Copying assets from source theme ${ sourceTheme.name.bold }...` );
 	
 	// do a nice clock animation to show with the progress
 	let currentIconIndex = 0;
@@ -253,24 +253,24 @@ async function _sync( sourceTheme, targetTheme, assetKeys, silent = false, shopi
 	// 'too many requests' error.
 	for ( var i = 0; i < assetKeys.length; i++ ) {
 		const key = assetKeys[ i ];
-		!json && progress();
+		!silent && progress();
 
 		// download full asset (to get the value)
 		const { value } = await shopify.asset.get( sourceTheme.id, { asset: { key } } );
-		!json && progress();
+		!silent && progress();
 
 		// upload asset to target theme
 		const r = await shopify.asset.update( targetTheme.id, { key, value } );
 
 		// mark asset is finished and show progress
 		finished++; 
-		!json && progress();
+		!silent && progress();
 
 		// avoid too many requests
 		await pause( 500 );
 	}
 
-	!json && process.stdout.write( `\n` );
+	!silent && process.stdout.write( `\n` );
 }
 
 /**
