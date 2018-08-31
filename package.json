@@ -1,6 +1,6 @@
 {
   "name": "shopify-cli",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Command line tools for Shopify",
   "main": "cli.js",
   "author": "Nicolas Alliaume @ on-lab.com",
