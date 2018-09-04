@@ -1,5 +1,8 @@
 const utils = require( '../utils' );
 const colors = require( 'colors' );
+const themeKit = require('@shopify/themekit');
+const fs = require( 'fs' );
+const kit = require( './kit' );
 
 /**
  * Actions supported by this module
@@ -11,7 +14,7 @@ const SUPPORTS = [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename'
  * 
  * @param  {Object} command The parsed command
  */
-module.exports = function( command ) {
+exports.run = function( command ) {
 
 	let action = command[ '__' ][ 1 ];
 	if ( action === 'delete' ) action = '_delete'; // delete is a keyword
@@ -132,6 +135,7 @@ async function duplicate( command ) {
 
 	try {
 		const shopify = utils.getShopify( command );
+		const { domain, password } = utils.getAuth( command );
 
 		// get original theme to have its name
 		const originalTheme = await shopify.theme.get( id );
@@ -145,7 +149,7 @@ async function duplicate( command ) {
 		const assets = ( await shopify.asset.list( id ) ).map( a => a.key );
 
 		// copy all the assets into the new theme
-		await _sync( originalTheme, newTheme, assets, command.json, shopify );
+		await _sync( originalTheme, newTheme, assets, domain, password, command.json );
 
 		if ( !command.json ) {
 			console.log( `${ assets.length } assets copied.` );
@@ -180,13 +184,14 @@ async function sync( command ) {
 
 	try {
 		const shopify = utils.getShopify( command );
+		const { domain, password } = utils.getAuth( command );
 
 		// get original and target themes to have theirn names
 		const sourceTheme = await shopify.theme.get( sourceId );
 		const targetTheme = await shopify.theme.get( targetId );
 
 		!command.json && console.log( 
-`🔁  Syncing${ files.length > 0 ? ` ${ files.length } ` : '' }asset(s) \
+`🔁  Syncing${ files.length > 0 ? ` ${ files.length } ` : ' ' }asset(s) \
 from ${ sourceTheme.name.bold } to ${ targetTheme.name.bold }` );
 
 		// get list of assets
@@ -204,7 +209,7 @@ from ${ sourceTheme.name.bold } to ${ targetTheme.name.bold }` );
 
 		// copy the assets into the new theme
 		const keysToCopy = files.length > 0 ? files : assets;
-		await _sync( sourceTheme, targetTheme, keysToCopy, command.json, shopify );
+		await _sync( sourceTheme, targetTheme, keysToCopy, domain, password, command.json );
 
 		if ( !command.json ) {
 			console.log( `${ keysToCopy.length } assets copied.` );
@@ -219,58 +224,63 @@ from ${ sourceTheme.name.bold } to ${ targetTheme.name.bold }` );
 	}
 }
 
-/**
- * Syncs assets between two existing themes. The list
- * of assets is indicated in the assetsKey param.
- *
- * If silent is true, no messages are shown.
- * 
- * @param  {Object}  sourceTheme 
- * @param  {Object}  targetTheme 
- * @param  {Array}  assetKeys   
- * @param  {Boolean} silent        
- * @param  {Object}  shopify     
- */
-async function _sync( sourceTheme, targetTheme, assetKeys, silent = false, shopify ) {
-	var finished = 0;
+async function _sync( sourceTheme, targetTheme, assetKeys, store, password, silent = false ) {
 	!silent && console.log( `⌛️  Copying assets from source theme ${ sourceTheme.name.bold }...` );
-	
-	// do a nice clock animation to show with the progress
-	let currentIconIndex = 0;
-	const icons = [ '🕛', '🕒', '🕗', '🕞', '🕧', '🕤' ];
 
-	const progress = () => {
-		currentIconIndex = currentIconIndex + 1 === icons.length ? 0 : currentIconIndex + 1;
-		process.stdout.write( `  ${ icons[ currentIconIndex ] }  ${ String(finished).bold } of ${ assetKeys.length } copied...\r` );
+	// if .sync dir already exists, either some other process is running
+	// at the same time, or a prev process was interrupted.
+	if ( fs.existsSync( './.sync' ) ) {
+		if ( !promptDeletePrevSync() ) {
+			throw new Error( 'Process aborted' );
+		}
+		// user accepted to delete dir
+		await utils.rmdir( './.sync' );
 	}
 
-	const pause = ( ms ) => new Promise( ( resolve, _ ) => {
-		setTimeout( () => resolve(), ms );
-	} )
+	// create swap dir
+	fs.mkdirSync( './.sync' );
 
-	// Fetch every asset and upload to the target theme.
-	// This has to be done sequencially, otherwise we get a 
-	// 'too many requests' error.
-	for ( var i = 0; i < assetKeys.length; i++ ) {
-		const key = assetKeys[ i ];
-		!silent && progress();
+	// create temporary theme kit config file using our own
+	// kit config command
+	kit.writeConfig( [ sourceTheme, targetTheme ], store, password, './.sync' );
 
-		// download full asset (to get the value)
-		const { value } = await shopify.asset.get( sourceTheme.id, { asset: { key } } );
-		!silent && progress();
+	// download files using theme kit nodejs api. Use .sync dir
+	// as the temp.
+	await themeKit.command( 'download', {
+		dir: './.sync',
+		password,
+		store,
+		themeid: sourceTheme.id,
+		files: assetKeys,
+		config: './.sync/config.yml',
+		env: kit.sanitizeThemeName( sourceTheme.name ),
+	});
 
-		// upload asset to target theme
-		const r = await shopify.asset.update( targetTheme.id, { key, value } );
+	// upload files to target theme from sync dir.
+	await themeKit.command( 'deploy', {
+		password,
+		store,
+		themeid: targetTheme.id,
+		dir: './.sync',
+		nodelete: true,		
+		config: './.sync/config.yml',
+		env: kit.sanitizeThemeName( targetTheme.name ),
+	});
 
-		// mark asset is finished and show progress
-		finished++; 
-		!silent && progress();
+	// clean up. Remove swap folder.
+	utils.rmdir( './.sync' );
+}
 
-		// avoid too many requests
-		await pause( 500 );
-	}
-
-	!silent && process.stdout.write( `\n` );
+/**
+ * Promps the user to confirm if they want to delete
+ * the existing swap folder or not.
+ * 
+ * @return {Boolean}
+ */
+function promptDeletePrevSync() {
+	return [ '', 'y' ].includes( utils.prompt( 
+`A folder .sync already exists. This could mean another sync is in progress, or a previous sync was interrumpet.
+Delete .sync folder? ` ).toLowerCase() );
 }
 
 /**

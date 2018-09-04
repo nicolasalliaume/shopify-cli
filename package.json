@@ -10,13 +10,23 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@shopify/themekit": "^1.0.0",
     "colors": "^1.3.2",
     "dotenv": "^6.0.0",
     "node-cmd": "^3.0.0",
+    "readline-sync": "^1.4.9",
+    "rimraf": "^2.6.2",
     "shopify-api-node": "^2.15.0"
   },
   "bin": {
     "shopify-cli": "./cli.js"
   },
-  "keywords": [ "shopify", "cli", "tool", "node", "nodejs", "command line" ]
+  "keywords": [
+    "shopify",
+    "cli",
+    "tool",
+    "node",
+    "nodejs",
+    "command line"
+  ]
 }

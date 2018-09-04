@@ -9,7 +9,7 @@ const cmd = require( 'node-cmd' );
  * 
  * @param  {Object} command The parsed command
  */
-module.exports = function( command ) {
+exports.run = function( command ) {
 
 	let action = command[ '__' ][ 1 ];
 
@@ -54,7 +54,6 @@ async function config( command ) {
 	const output = command.out || command.o || '.';
 	const filename = command.name || command.n || 'config.yml';
 	const includeThemes = ( command.t || command.theme || '' ).split( ',' ).filter( t => !!t );
-	const outPath = path.join( output, filename );
 
 	try {
 		let themes = await utils.getThemes( command );
@@ -75,30 +74,46 @@ ${ includeThemes.join(', ') }` );
 		const { domain, apiKey, password } = utils.getAuth( command );
 
 		// create file with theme configs
-		const template = `{ name }:\n  password: { password }\n  theme_id: { id }\n  store: { domain }`;
-		const applyTemplate = ({ id, name }) => (
-			template
-				.replace( '{ name }', sanitizeThemeName( name ) )
-				.replace( '{ id }', id )
-				.replace( '{ password }', password)
-				.replace( '{ domain }', domain ) );
-		
-		const content = themes.map( applyTemplate ).join('\n\n');
-
-		// write file on the indicated output dir, or 
-		// on the local dir if not specified
-		fs.writeFileSync( outPath, content, 'utf8' );
+		exports.writeConfig( themes, domain, password, output, filename );
 
 		if ( command.json ) return console.log({ ok: 1 });
 
-		const namesForLog = themes.map( ({ name }) => sanitizeThemeName( name ).bold );
+		const namesForLog = themes.map( ({ name }) => exports.sanitizeThemeName( name ).bold );
 		console.log( 
-`✅  File created at ${ outPath }.
+`✅  File ${ path.join( output, filename ) } created.
 
 👉  The following theme configs have been created: \n\t${ namesForLog.join( '\n\t' ) }` );
 
 	}
 	catch ( e ) { showError( e, 'create' ) }
+}
+
+/**
+ * Writes a config file that contains each of the given
+ * themes as an environment to use with theme kit.
+ * 
+ * @param  {Array} themes   Array of theme objects
+ * @param  {String} domain   
+ * @param  {String} password 
+ * @param  {String} output   
+ * @param  {String} filename    
+ */
+exports.writeConfig = function( themes, domain, password, output = '.', filename = 'config.yml' ) {
+	const outPath = path.join( output, filename );
+
+	const template = `{ name }:\n  password: { password }\n  theme_id: { id }\n  store: { domain }`;
+	const applyTemplate = ({ id, name }) => (
+		template
+			.replace( '{ name }', exports.sanitizeThemeName( name ) )
+			.replace( '{ id }', id )
+			.replace( '{ password }', password)
+			.replace( '{ domain }', domain ) );
+	
+	const content = themes.map( applyTemplate ).join('\n\n');
+
+	// write file on the indicated output dir, or 
+	// on the local dir if not specified
+	fs.writeFileSync( outPath, content, 'utf8' );
 }
 
 /**
@@ -108,7 +123,7 @@ ${ includeThemes.join(', ') }` );
  * @param  {String} name 
  * @return {String}      
  */
-function sanitizeThemeName( name ) {
+exports.sanitizeThemeName = function( name ) {
 	return name.replace( /\s/g, '-' ).replace( /[^\w-_]/gi, '' ).toLowerCase();
 }
 
