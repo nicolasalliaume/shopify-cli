@@ -2,6 +2,8 @@ require( 'dotenv' ).config();
 
 const colors = require( 'colors' );
 const Shopify = require( 'shopify-api-node' );
+const readline = require( 'readline-sync' );
+const rimraf = require( 'rimraf' );
 
 /**
  * Returns auth information indicated in the command, 
@@ -42,6 +44,37 @@ exports.getShopify = function( command ) {
  */
 exports.getThemes = function( command ) {
 	return exports.getShopify( command ).theme.list();
+}
+
+/**
+ * Prompts the user for an input. May provide options
+ * as second parameter, and a default option. If no
+ * default is provided, first option will be used.
+ * 
+ * @param  {String} message       
+ * @param  {Array}  options       
+ * @param  {Array}  defaultOption 
+ * @return {String}               
+ */
+exports.prompt = function( message, options = ['Y/y', 'N/n'], defaultOption = ['y'] ) {
+	const optionsStr = options && options.length > 0 
+		? `(${ options.join( ', ' ) }) [${ defaultOption || options[0] }]` : '';
+	return readline.question( `${ message }${ optionsStr }: ` );
+}
+
+/**
+ * Deletes a dir using `rm -rf`. Returns a promise.
+ * 
+ * @param  {String} path 
+ * @return {Promise}      
+ */
+exports.rmdir = function( path ) {
+	return new Promise( ( resolve, reject ) => {
+		rimraf( path, function( error ) { 
+			if ( error ) return reject( error );
+			resolve();
+		} )
+	} )
 }
 
 /**

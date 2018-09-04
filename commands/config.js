@@ -7,7 +7,7 @@ const path = require( 'path' );
  * 
  * @param  {Object} command The parsed command
  */
-module.exports = async function( command ) {
+exports.run = async function( command ) {
 
 	const domain = command.d || command.domain;
 	const key = command.k || command.key;
