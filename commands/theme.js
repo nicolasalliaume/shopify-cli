@@ -8,7 +8,7 @@ const kit = require( './kit' );
  * Actions supported by this module
  */
 const SUPPORTS = [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename', 'sync', '_delete', 'bootstrap', 'install' ];
-const THEMES = [ 'brooklyn', 'bundless', 'debut', 'jumpstart','minimal', 'narrative', 'pop', 'simple', 'supply', 'venture' ];
+const THEMES = [ 'brooklyn', 'boundless', 'debut', 'jumpstart','minimal', 'narrative', 'pop', 'simple', 'supply', 'venture' ];
 
 /**
  * Module entry point
@@ -158,7 +158,8 @@ function _delete( command ) { remove( command ) }
 function install( command ) { bootstrap( command ) }
 
 /**
- * Installs one of the free shopify templates that are available.
+ * Installs one or more of the free shopify templates that 
+ * are available.
  * 
  * The themes are stored as zip files in an S3 bucket with 
  * public read access. This is a workaround, since Shopify
@@ -168,10 +169,35 @@ function install( command ) { bootstrap( command ) }
  * @param  {Object} command The parsed command
  */
 async function bootstrap( command ) {
-	let name = command[ 'name' ] || command[ 'n' ] || command[ '__' ][ 2 ];
-	if ( !name ) return printHelp( 'bootstrap' );
+	let names = command[ 'name' ] || command[ 'n' ] || [ ...command[ '__' ] ].splice( 2 );
+	const all = command.all;
 
-	name = name.toLowerCase();
+	if ( names.length === 0 && !all ) return printHelp( 'bootstrap' );
+
+	if ( all ) names = THEMES;
+	
+	// install all themes sequencially
+	try {
+		for (var i = 0; i < names.length; i++) {
+			await installTheme( names[i], command );
+		}
+	}
+	catch( e ) {
+		showError( e, 'bootstrap' );
+	}
+}
+
+/**
+ * Installs a shopify theme.
+ * 
+ * The themes are stored as zip files in an S3 bucket with 
+ * public read access named with the following pattern: <name>.zip
+ *
+ * @param  {Stirng} _name Name of the theme to install
+ * @param  {Object} command The parsed command
+ */
+async function installTheme( _name, command ) {
+	const name = _name.toLowerCase();
 
 	// verify if the theme exists
 	if ( !THEMES.includes( name ) ) return printHelp( 'bootstrap' );
@@ -179,23 +205,18 @@ async function bootstrap( command ) {
 	const url = `https://s3.amazonaws.com/shopify-cli-store/${ name }.zip`;
 	const capitalizedName = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
 
-	try {
-		const shopify = utils.getShopify( command );
-		const theme = {
-			name: capitalizedName,
-			src: url,
-			role: 'unpublished',
-		}
-
-		// install theme
-		const response = await shopify.theme.create( theme );
-		if ( command.json ) return console.log( response );
-
-		console.log( `✅  Theme ${ capitalizedName } created with ID ${ response.id }` );
+	const shopify = utils.getShopify( command );
+	const theme = {
+		name: capitalizedName,
+		src: url,
+		role: 'unpublished',
 	}
-	catch( e ) {
-		showError( e, 'duplicate' );
-	}
+
+	// install theme
+	const response = await shopify.theme.create( theme );
+	if ( command.json ) return console.log( response );
+
+	console.log( `✅  Theme ${ capitalizedName.bold } created with ID ${ response.id }` );
 }
 
 /**
