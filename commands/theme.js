@@ -7,7 +7,8 @@ const kit = require( './kit' );
 /**
  * Actions supported by this module
  */
-const SUPPORTS = [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename', 'sync', '_delete' ];
+const SUPPORTS = [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename', 'sync', '_delete', 'bootstrap', 'install' ];
+const THEMES = [ 'brooklyn', 'bundless', 'debut', 'jumpstart','minimal', 'narrative', 'pop', 'simple', 'supply', 'venture' ];
 
 /**
  * Module entry point
@@ -100,11 +101,31 @@ async function rename( command ) {
  * @param {Object} command The parsed command 
  */
 async function remove( command ) {
-	const ids = command[ 'id' ] ? [ command[ 'id' ] ] : [ ...command[ '__' ] ].splice( 2 );
-	if ( ids.length === 0 ) return printHelp( 'remove' );
+	let ids = command[ 'id' ] ? [ command[ 'id' ] ] : [ ...command[ '__' ] ].splice( 2 );
+	const all = command.all;
+
+	if ( !all && ids.length === 0 ) return printHelp( 'remove' );
+
+	// ask for user confirmation if we're deleting all themes
+	// and no -y or --yes flag present.
+	if ( all && !command.y || command.yes ) {
+		if ( !promptDeleteAllThemes() ) return;
+	}
 
 	try {
 		const shopify = utils.getShopify( command );
+
+		if ( all ) {
+			// fetch all non-active theme ids
+			const themes = await utils.getThemes( command );
+			ids = themes.filter( t => t.role !== 'main' ).map( t => t.id );
+
+			// check if there're themes to delete
+			if ( ids.length === 0 ) {
+				return console.log( '👎  No themes that can be deleted are available.' );
+			}
+		}
+
 		const results = await Promise.all( ids.map( id => shopify.theme.delete( id ) ) );
 		if ( command.json ) return console.log( results );
 
@@ -114,11 +135,68 @@ async function remove( command ) {
 }
 
 /**
+ * Promps the user to confirm if they want to delete
+ * all non-active themes.
+ * 
+ * @return {Boolean}
+ */
+function promptDeleteAllThemes() {
+	return [ 'y' ].includes( utils.prompt( 
+`Do you really want to delete ${ 'all'.black } non-active themes from this shop? `, undefined, 'n' ).toLowerCase() );
+}
+
+/**
  * Alias for remove.
  * 
  * @param  {Object} command The parsed command 
  */
 function _delete( command ) { remove( command ) }
+
+/**
+ * Alias for bootstrap
+ */
+function install( command ) { bootstrap( command ) }
+
+/**
+ * Installs one of the free shopify templates that are available.
+ * 
+ * The themes are stored as zip files in an S3 bucket with 
+ * public read access. This is a workaround, since Shopify
+ * doesn't provide a way to install those themes using an API
+ * endpoint.
+ * 
+ * @param  {Object} command The parsed command
+ */
+async function bootstrap( command ) {
+	let name = command[ 'name' ] || command[ 'n' ] || command[ '__' ][ 2 ];
+	if ( !name ) return printHelp( 'bootstrap' );
+
+	name = name.toLowerCase();
+
+	// verify if the theme exists
+	if ( !THEMES.includes( name ) ) return printHelp( 'bootstrap' );
+
+	const url = `https://s3.amazonaws.com/shopify-cli-store/${ name }.zip`;
+	const capitalizedName = name.charAt( 0 ).toUpperCase() + name.slice( 1 );
+
+	try {
+		const shopify = utils.getShopify( command );
+		const theme = {
+			name: capitalizedName,
+			src: url,
+			role: 'unpublished',
+		}
+
+		// install theme
+		const response = await shopify.theme.create( theme );
+		if ( command.json ) return console.log( response );
+
+		console.log( `✅  Theme ${ capitalizedName } created with ID ${ response.id }` );
+	}
+	catch( e ) {
+		showError( e, 'duplicate' );
+	}
+}
 
 /**
  * Duplicates a theme. 
@@ -361,6 +439,7 @@ function help( action ) {
 		case 'rename': return helpRename();
 		case 'duplicate': return helpDuplicate();
 		case 'sync': return helpSync();
+		case 'bootstrap': return helpBootstrap();
 		default: return helpGeneral();
 	}
 }
@@ -392,6 +471,29 @@ function helpGeneral() {
 
 🤓  ${ '#protip:'.bold.italic } Use --help with an action to get specific help for that action. \
 i.e: $ shopify-cli themes list --help
+	`
+}
+
+/**
+ * Returns a string with help for the `bootstrap` action of this
+ * module.
+ * 
+ * @return {String} 
+ */
+function helpBootstrap() {
+	return `
+✅  ${ 'Usage:'.bold } $ shopify-cli themes bootstrap <name> [ ( --domain | -d ) <domain> ( --key | -k ) \
+<api key> ( --password | -p ) <api password> ]
+
+👉  ${ 'Available themes:'.bold }
+	${ THEMES.join( ', ' ) } 
+
+🙌  ${ 'Example:'.bold } $ shopify-cli themes bootstrap debut -d sample.myshopify.com -k 6570902bf65f43f36263as12asa63093 \
+-p asdasd2345asd2345asd234a5sd234
+	If you've run the config command before, then there's no need to use -d, -k, ...
+   ${ 'Example:'.bold } $ shopify-cli themes bootstrap debut
+
+🤓  ${ '#protip:'.bold.italic } Use --json to get a JSON output instead of the pretty one.
 	`
 }
 
@@ -441,13 +543,21 @@ function helpActivate() {
  */
 function helpRemove() {
 	return `
-✅  ${ 'Usage:'.bold } $ shopify-cli themes remove <id> [ ( --domain | -d ) <domain> ( --key | -k ) \
+✅  ${ 'Usage:'.bold } $ shopify-cli themes remove ( <id> | --all ) [ ( --domain | -d ) <domain> ( --key | -k ) \
 <api key> ( --password | -p ) <api password> ]
 
 🙌  ${ 'Example:'.bold } $ shopify-cli themes remove 123871292 -d sample.myshopify.com \
 -k 6570902bf65f43f36263as12asa63093 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
    ${ 'Example:'.bold } $ shopify-cli themes remove 123871292
+
+   You can also remove ${ 'all'.bold.italic } themes by adding ${ '--all'.italic }.
+   ${ 'Example:'.bold } $ shopify-cli themes remove all
+
+   Removing all themes ${ 'will not'.bold } remove the active theme, as per Shopify restriction.
+   Also, adding --all will ask for user confirmation. To skip confirmation prompt, add -y.
+   ${ 'Example:'.bold } $ shopify-cli themes remove all -y
+
 	`
 }
 

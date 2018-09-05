@@ -56,7 +56,7 @@ exports.getThemes = function( command ) {
  * @param  {Array}  defaultOption 
  * @return {String}               
  */
-exports.prompt = function( message, options = ['Y/y', 'N/n'], defaultOption = ['y'] ) {
+exports.prompt = function( message, options = ['Y/y', 'N/n'], defaultOption = 'y' ) {
 	const optionsStr = options && options.length > 0 
 		? `(${ options.join( ', ' ) }) [${ defaultOption || options[0] }]` : '';
 	return readline.question( `${ message }${ optionsStr }: ` );
