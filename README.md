@@ -56,10 +56,13 @@ This command returns a list of all the themes, indicating the active one. It als
 
 Example: `$ shopify-cli themes list`
 
-#### Remove themes `$ shopify-cli themes remove <id> [ <id> <id> ... ]`
+#### Remove themes `$ shopify-cli themes remove ( <id> | --all ) [ <id> <id> ... ]`
 This command will remove the indicated theme (or themes if more than one is indicated).
+It also accepts a `--all` flag that will remove all themes (except for the active one). The `--all` flag will ask for user confirmation before deleting. To bypass user confirmation use the `-y` flag. 
 
-Example: `$ shopify-cli themes remove 231761231`
+Example: `$ shopify-cli themes remove 231761231`  Removes theme with ID 231761231.
+Example: `$ shopify-cli themes remove --all`  Removes all themes, except active one. Asks for confirmation.
+Example: `$ shopify-cli themes remove --all -y`  Removes all themes, except active one, no confirmation needed.
 
 #### Activate theme `$ shopify-cli themes activate <id>`
 This command activates the theme with the given ID.
@@ -82,6 +85,22 @@ Example: `$ shopify-cli themes duplicate 231761231 --name "Duplicate of Debut"`
 Copies assets from the source theme into the target theme. All assets will be copied, unless a list of files is provided.
 
 Example: `$ shopify-cli themes sync 231761231 1127862138 templates/cart.liquid templates/404.liquid assets/main.js`
+
+#### Bootstrap themes `$ shopify-cli themes bootstrap <name> [ <name> ... ]`
+This command will install one or more of the free themes provided by Shopify. These are: 
+- brooklyn
+- boundless
+- debut
+- jumpstart
+- minimal
+- narrative
+- pop
+- simple
+- supply and venture. 
+It also accepts a `--all` flag that will install all themes.
+
+Example: `$ shopify-cli themes bootstrap minimal`
+Example: `$ shopify-cli themes bootstrap --all`
 
 ## Theme Kit integration
 [Theme kit](https://shopify.github.io/themekit/) is a cross-platform tool for building Shopify Themes. Theme Kit uses a yaml config file that you can create with Shopify CLI.
