@@ -61,7 +61,9 @@ This command will remove the indicated theme (or themes if more than one is indi
 It also accepts a `--all` flag that will remove all themes (except for the active one). The `--all` flag will ask for user confirmation before deleting. To bypass user confirmation use the `-y` flag. 
 
 Example: `$ shopify-cli themes remove 231761231`  Removes theme with ID 231761231.
+
 Example: `$ shopify-cli themes remove --all`  Removes all themes, except active one. Asks for confirmation.
+
 Example: `$ shopify-cli themes remove --all -y`  Removes all themes, except active one, no confirmation needed.
 
 #### Activate theme `$ shopify-cli themes activate <id>`
@@ -96,10 +98,13 @@ This command will install one or more of the free themes provided by Shopify. Th
 - narrative
 - pop
 - simple
-- supply and venture. 
+- supply
+- venture.
+
 It also accepts a `--all` flag that will install all themes.
 
 Example: `$ shopify-cli themes bootstrap minimal`
+
 Example: `$ shopify-cli themes bootstrap --all`
 
 ## Theme Kit integration
