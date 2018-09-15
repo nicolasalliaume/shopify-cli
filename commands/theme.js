@@ -11,6 +11,20 @@ const SUPPORTS = [ 'list', 'activate', 'duplicate', 'remove', 'upload', 'rename'
 const THEMES = [ 'brooklyn', 'boundless', 'debut', 'jumpstart','minimal', 'narrative', 'pop', 'simple', 'supply', 'venture' ];
 
 /**
+ * Exports to the outside world, so they can be
+ * used by outside scripts.
+ */
+exports.activate = activate;
+exports.rename = rename;
+exports.remove = remove;
+exports.bootstrap = bootstrap;
+exports.installTheme = installTheme;
+exports.duplicate = duplicate;
+exports.sync = sync;
+exports._sync = _sync;
+exports.upload = upload;
+
+/**
  * Module entry point
  * 
  * @param  {Object} command The parsed command
@@ -503,7 +517,7 @@ i.e: $ shopify-cli themes list --help
  */
 function helpBootstrap() {
 	return `
-✅  ${ 'Usage:'.bold } $ shopify-cli themes bootstrap <name> [ ( --domain | -d ) <domain> ( --key | -k ) \
+✅  ${ 'Usage:'.bold } $ shopify-cli themes bootstrap ( <name> | --all ) [ ( --domain | -d ) <domain> ( --key | -k ) \
 <api key> ( --password | -p ) <api password> ]
 
 👉  ${ 'Available themes:'.bold }
@@ -513,6 +527,9 @@ function helpBootstrap() {
 -p asdasd2345asd2345asd234a5sd234
 	If you've run the config command before, then there's no need to use -d, -k, ...
    ${ 'Example:'.bold } $ shopify-cli themes bootstrap debut
+
+👉  Use --all to install all themes
+🙌  ${ 'Example:'.bold } $ shopify-cli themes bootstrap --all
 
 🤓  ${ '#protip:'.bold.italic } Use --json to get a JSON output instead of the pretty one.
 	`
