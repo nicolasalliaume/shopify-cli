@@ -1,5 +1,4 @@
-require( 'dotenv' ).config();
-
+require( './env' );
 const colors = require( 'colors' );
 const Shopify = require( 'shopify-api-node' );
 const readline = require( 'readline-sync' );

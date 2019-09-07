@@ -15,14 +15,17 @@ const argv = [ ...process.argv ].splice( 2 );
 
 	switch ( action ) {
 
-		case 'config': return await require( './commands/config' ).run( command );
+		case 'config': 
+			return await require( './commands/config' ).run( command );
 
 		case 'themes': 
-		case 'theme': return await require( './commands/theme' ).run( command );
+		case 'theme': 
+			return await require( './commands/theme' ).run( command );
 
 		case 'kit':
 		case 'stk':
-		case 'themekit': return await require( './commands/kit' ).run( command );
+		case 'themekit': 
+			return await require( './commands/kit' ).run( command );
 
 		default: return console.log( '❌  Error: Command not recognized. ' + help() );
 	}

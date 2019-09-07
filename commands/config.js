@@ -16,12 +16,12 @@ exports.run = async function( command ) {
 	if ( !domain || !key || !password ) return printHelp();
 
 	try {
-		// remove previous .env if any
-		fs.unlinkSync( path.join( '.', '.env' ) );
+		// remove previous .env.cli if any
+		fs.unlinkSync( path.join( '.', '.env.cli' ) );
 	}
 	catch (e) { /* do nothing, it's safe */ }
 
-	// write new .env with config params
+	// write new .env.cli with config params
 	writeConfigFile( domain, key, password );
 
 	console.log( `
@@ -41,7 +41,7 @@ function indexOf( e, arr ) {
 
 function writeConfigFile( domain, key, password ) {
 	const content = `DOMAIN=${domain}\nKEY=${key}\nPASSWORD=${password}`;
-	fs.writeFileSync( path.join( '.', '.env' ), content );
+	fs.writeFileSync( path.join( '.', '.env.cli' ), content );
 }
 
 function printHelp() {
