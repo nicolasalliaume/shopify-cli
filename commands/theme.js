@@ -49,7 +49,13 @@ exports.run = function( command ) {
  */
 async function list( command ) {
 	try {
-		const themes = await utils.getThemes( command );
+		let themes = await utils.getThemes( command );
+
+		// Apply filters if any
+		if ( command.name ) {
+			themes = themes.filter( t => t.name == command.name );
+		}
+
 		if ( command.json ) return console.log( themes );
 
 		themes.forEach( theme => {
