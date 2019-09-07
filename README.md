@@ -51,10 +51,16 @@ Right now, the CLI supports the following operations:
 
 ## Themes
 
-#### List themes `$ shopify-cli themes list`
+#### List themes `$ shopify-cli themes list [ --json ] [ --name <theme name> [ --field <field> ] ]`
 This command returns a list of all the themes, indicating the active one. It also includes created time, updated time and ID.
 
-Example: `$ shopify-cli themes list`
+Use `--name <name>` to get just the theme matching the specified name. You can also add `--field <field>` on top of it to get just one field from the matching theme. For example: 
+
+Example: `$ shopify-cli themes list`  Lists all themes.
+
+Example: `$ shopify-cli themes list --name "First Preview"`  Lists information of theme "First Preview".
+
+Example: `$ shopify-cli themes list --name "First Preview" --field id` Prints the ID of the theme "First Preview".
 
 #### Remove themes `$ shopify-cli themes remove ( <id> | --all ) [ <id> <id> ... ]`
 This command will remove the indicated theme (or themes if more than one is indicated).
