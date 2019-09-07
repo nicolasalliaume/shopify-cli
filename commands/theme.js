@@ -56,6 +56,18 @@ async function list( command ) {
 			themes = themes.filter( t => t.name == command.name );
 		}
 
+		// Return one field only if specified
+		if ( command.field ) {
+			if ( themes.length === 1 ) {
+				return console.log( themes[ 0 ][ command.field ] );
+			}
+			else {
+				throw new Error( `Cannot return value for ${ command.field } when `
+					+ `more than one result exists. Use --name <theme name> to specify `
+					+ `a single theme.` );
+			}
+		}
+
 		if ( command.json ) return console.log( themes );
 
 		themes.forEach( theme => {
@@ -70,6 +82,11 @@ async function list( command ) {
 	catch ( e ) {
 		showError( e, 'list' );
 	}
+}
+
+
+async function getID( command ) {
+
 }
 
 /**
