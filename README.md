@@ -1,3 +1,7 @@
+## Deprication warning
+
+This package has been depricated in favour of a new one called [on-shopify-cli](https://github.com/nicolasalliaume/on-shopify-cli).
+
 # Shopify CLI Utility ( "The Wordpress CLI for Shopify" )
 
 [![npm version](https://badge.fury.io/js/shopify-cli.svg)](https://badge.fury.io/js/shopify-cli) [![Developed by ON Lab](http://on-lab.com/developed-by-on-lab.svg?v=3)](http://on-lab.com)
